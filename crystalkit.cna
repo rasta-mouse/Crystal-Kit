@@ -22,7 +22,7 @@ set BEACON_RDLL_GENERATE
 
     print_info ( "BEACON_RDLL_GENERATE" );
 
-    $spec_path = getFileProper ( script_resource ( "loader" ), "loader.spec" );
+    $spec_path = getFileProper ( script_resource ( ), "rdll.spec" );
     $spec      = [ LinkSpec Parse: $spec_path ];
     $final     = [ $spec run: $beacon, [ new HashMap ] ];
 
@@ -56,7 +56,7 @@ set BEACON_RDLL_GENERATE_LOCAL
 
     print_info ( "BEACON_RDLL_GENERATE_LOCAL" );
 
-    $spec_path = getFileProper ( script_resource ( "local-loader" ), "loader.spec" );
+    $spec_path = getFileProper ( script_resource ( ), "rdll-local.spec" );
     $spec      = [ LinkSpec Parse: $spec_path ];
 
     $hash_map  = [ new HashMap ];
@@ -92,7 +92,7 @@ set POSTEX_RDLL_GENERATE
 
     print_info ( "POSTEX_RDLL_GENERATE" );
 
-    $spec_path = getFileProper ( script_resource ( "postex-loader" ), "loader.spec" );
+    $spec_path = getFileProper ( script_resource ( ), "rdll-postex.spec" );
     $spec      = [ LinkSpec Parse: $spec_path ];
 
     $hash_map  = [ new HashMap ];
