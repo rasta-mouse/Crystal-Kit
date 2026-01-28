@@ -64,6 +64,9 @@ x64:
     addhook "KERNEL32$VirtualQuery"       "_VirtualQuery"
     addhook "KERNEL32$WriteProcessMemory" "_WriteProcessMemory"
     addhook "OLE32$CoCreateInstance"      "_CoCreateInstance"
+    addhook "WS2_32$WSASocketA"             "_WSASocketA"
+    addhook "WS2_32$WSASocketW"             "_WSASocketW"
+    addhook "WS2_32$WSAStartup"             "_WSAStartup"
 
     # hook functions in pico
     attach "KERNEL32$VirtualProtect" "_VirtualProtect"  # this is needed to hook VirtualProtect in mask.c

