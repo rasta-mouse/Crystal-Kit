@@ -49,7 +49,7 @@ x64:
     addhook "KERNEL32$ExitThread"         "_ExitThread"
     addhook "KERNEL32$GetThreadContext"   "_GetThreadContext"
     addhook "KERNEL32$HeapAlloc"          "_HeapAlloc"
-    addhook "KERNEL32$HeapAlloc"          "_HeapReAlloc"
+    addhook "KERNEL32$HeapReAlloc"        "_HeapReAlloc"
     addhook "KERNEL32$HeapFree"           "_HeapFree"
     addhook "KERNEL32$LoadLibraryA"       "_LoadLibraryA"
     addhook "KERNEL32$MapViewOfFile"      "_MapViewOfFile"
