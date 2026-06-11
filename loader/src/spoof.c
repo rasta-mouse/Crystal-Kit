@@ -283,6 +283,10 @@ PVOID find_gadget( PVOID module )
             }
         }
 
+        if ( counter == 0 ) {
+            return NULL;
+        }
+
         found_gadgets = TRUE;
     }
 
