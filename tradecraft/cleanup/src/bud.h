@@ -1,0 +1,47 @@
+/**
+ * https://github.com/Cobalt-Strike/bof-vs/blob/c9b3ae2276cced9335cdc73cd4956b8a9b3b0708/BOF-Template/beacon.h
+ */
+
+#include <windows.h>
+
+#define BUD_MAX_REGIONS      6
+#define BUD_MAX_SECTIONS     8
+#define BUD_MAX_HEAP_RECORDS 64
+
+typedef struct _HEAP_RECORD {
+	PVOID  ptr;
+	SIZE_T size;
+} HEAP_RECORD, *PHEAP_RECORD;
+
+typedef struct _HEAPALLOC_INFO {
+	PVOID heapHandle;
+	BOOL  destroyHeap;
+} HEAPALLOC_INFO, *PHEAPALLOC_INFO;
+
+typedef struct _MODULESTOMP_INFO {
+	HMODULE moduleHandle;
+} MODULESTOMP_INFO, *PMODULESTOMP_INFO;
+
+typedef union _ALLOCATED_MEMORY_CLEANUP_INFORMATION {
+	HEAPALLOC_INFO heapAllocInfo;
+	MODULESTOMP_INFO moduleStompInfo;
+} ALLOCATED_MEMORY_CLEANUP_INFORMATION, *PALLOCATED_MEMORY_CLEANUP_INFORMATION;
+
+typedef struct _ALLOCATED_MEMORY_SECTION {
+	PVOID baseAddress;
+	SIZE_T virtualSize;
+	DWORD currentProtect;
+	DWORD previousProtect;
+} ALLOCATED_MEMORY_SECTION, *PALLOCATED_MEMORY_SECTION;
+
+typedef struct _ALLOCATED_MEMORY_REGION {
+	PVOID allocationBase;
+	SIZE_T regionSize;
+	ALLOCATED_MEMORY_SECTION sections[BUD_MAX_SECTIONS];
+	ALLOCATED_MEMORY_CLEANUP_INFORMATION cleanupInfo;
+} ALLOCATED_MEMORY_REGION, *PALLOCATED_MEMORY_REGION;
+
+typedef struct {
+	ALLOCATED_MEMORY_REGION memoryRegions[BUD_MAX_REGIONS];
+	HEAP_RECORD heapRecords[BUD_MAX_HEAP_RECORDS];
+} ALLOCATED_MEMORY, *PALLOCATED_MEMORY;

